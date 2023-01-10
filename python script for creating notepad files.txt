@@ -23,5 +23,50 @@ This script assumes that the names are in the first column of the sheet named "S
 I hope this helps! Let me know if you have any questions.
 
 
+import requests
+import xml.etree.ElementTree as ET
+
+# Set the URL of the Oracle BI Presentation Services
+url = 'http://your_server_name:port/analytics/saw.dll?SoapImpl=nQSessionService'
+
+# Set the Oracle BI Presentation Services credentials
+headers = {'Content-Type': 'text/xml'}
+username = 'your_username'
+password = 'your_password'
+
+# Set the report ID of the report you want to extract the SQL script from
+report_id = 'your_report_id'
+
+# Build the SOAP request
+soap_request = """
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v10="urn://oracle.bi.webservices/v10">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <v10:getSQL>
+         <v10:reportRequest>
+            <v10:sessionID>?</v10:sessionID>
+            <v10:reportRef>
+               <v10:reportPath>/shared/your_folder_path/"""+report_id+"""</v10:reportPath>
+            </v10:reportRef>
+            <v10:presentationInfo>
+               <v10:prompts>
+               </v10:prompts>
+            </v10:presentationInfo>
+         </v10:reportRequest>
+      </v10:getSQL>
+   </soapenv:Body>
+</soapenv:Envelope>"""
+
+# Send the SOAP request
+response = requests.post(url, headers=headers, auth=(username, password), data=soap_request)
+
+# Parse the SOAP response
+root = ET.fromstring(response.content)
+sql_script = root[0][0][0][0].text
+
+# Print the SQL script
+print(sql_script)
+
+
 
 
