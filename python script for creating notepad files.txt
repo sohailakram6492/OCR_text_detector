@@ -1,0 +1,27 @@
+import openpyxl
+import os
+
+# Open the Excel file
+wb = openpyxl.load_workbook('names.xlsx')
+
+# Get the sheet with the names
+sheet = wb.get_sheet_by_name('Sheet1')
+
+# Iterate through each row in the sheet
+for row in sheet.rows:
+    # Get the name from the first cell in the row
+    name = row[0].value
+
+    # Create a new text file with the name as the file name
+    with open(name + '.txt', 'w') as file:
+        # Write the name to the file
+        file.write(name)
+
+print("Done!")
+This script assumes that the names are in the first column of the sheet named "Sheet1" in an Excel file named "names.xlsx". You can adjust the script as needed to fit your specific use case.
+
+I hope this helps! Let me know if you have any questions.
+
+
+
+
