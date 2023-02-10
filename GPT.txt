@@ -1,0 +1,16 @@
+DECLARE
+  v_COUNT NUMBER := 0;
+  type t_data is table of campaigns_temp%rowtype;
+  l_data t_data;
+BEGIN
+  SELECT * BULK COLLECT INTO l_data 
+  FROM CAMPAIGNS_TEMP 
+  WHERE ROWNUM <= 100000;
+  
+  FORALL i IN 1..l_data.COUNT 
+  UPDATE CAMPAIGNS_REP A
+  SET A.KPI_MTD_M1 = l_data(i).MTD_AVG
+  WHERE A.ACCOUNT_ID = l_data(i).ACCT_COUNT;
+  
+  COMMIT;
+END;
