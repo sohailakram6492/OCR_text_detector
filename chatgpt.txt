@@ -1,0 +1,37 @@
+import win32com.client
+import re
+import pandas as pd
+
+# Initialize Outlook
+outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
+
+# Define the mailbox and folder to search in
+inbox = outlook.Folders("example@example.com").Folders("Inbox")
+
+# Define the search criteria
+subject_pattern = re.compile(r"example subject", re.IGNORECASE)
+body_pattern = re.compile(r"example body", re.IGNORECASE)
+
+# Define the columns to extract from the email table
+columns = ["Column 1", "Column 2", "Column 3"]
+
+# Initialize an empty DataFrame to store the extracted data
+data = pd.DataFrame(columns=columns)
+
+# Loop through all the unread emails in the folder
+for email in inbox.Items.Restrict("[Unread]=True"):
+    if subject_pattern.search(email.Subject) and body_pattern.search(email.Body):
+        # Extract the table from the email body
+        table_html = re.search(r"<table.*?</table>", email.HTMLBody, re.DOTALL)
+        if table_html:
+            # Parse the HTML table into a DataFrame
+            table = pd.read_html(table_html.group())[0]
+            # Extract the desired columns
+            table = table[columns]
+            # Append the data to the DataFrame
+            data = data.append(table, ignore_index=True)
+        # Mark the email as read
+        email.UnRead = False
+
+# Save the extracted data to an Excel file
+data.to_excel("output.xlsx", index=False)
